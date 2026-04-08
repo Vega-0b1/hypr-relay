@@ -58,3 +58,24 @@ pub fn run(args: &[String]) {
         notification::send("volume", 9990, 1000, &format!("Volume {percentage}%"), "");
     }
 }
+
+pub fn mic_toggle() {
+    let source = "@DEFAULT_AUDIO_SOURCE@";
+    Command::new("wpctl")
+        .args(["set-mute", source, "toggle"])
+        .status()
+        .ok();
+
+    let out = Command::new("wpctl")
+        .args(["get-volume", source])
+        .output()
+        .unwrap();
+    let out = String::from_utf8_lossy(&out.stdout);
+    let muted = out.contains("[MUTED]");
+
+    if muted {
+        notification::send("microphone", 9994, 1000, "Mic Muted", "");
+    } else {
+        notification::send("microphone", 9994, 1000, "Mic Active", "");
+    }
+}
