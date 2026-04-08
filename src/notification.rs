@@ -12,5 +12,5 @@ pub fn send(app: &str, id: u32, timeout: i32, summary: &str, body: &str) {
             app.to_string(),
         ))
         .show()
-        .unwrap();
+        .ok();
 }
