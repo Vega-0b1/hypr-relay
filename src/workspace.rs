@@ -20,15 +20,19 @@ pub fn run(socket_path: &dyn Fn(&str) -> String) {
 }
 
 fn active_workspace(socket_path: &dyn Fn(&str) -> String) -> (i32, String) {
-    let mut stream = UnixStream::connect(socket_path(".socket.sock")).unwrap();
-    stream.write_all(b"j/activeworkspace").unwrap();
+    let Ok(mut stream) = UnixStream::connect(socket_path(".socket.sock")) else {
+        return (0, "?".to_string());
+    };
+    stream.write_all(b"j/activeworkspace").ok();
 
     let mut response = Vec::new();
     let mut buf = [0u8; 8192];
     loop {
         let n = stream.read(&mut buf).unwrap_or(0);
         response.extend_from_slice(&buf[..n]);
-        if n == 0 || n < 8192 { break; }
+        if n == 0 || n < 8192 {
+            break;
+        }
     }
 
     let response = String::from_utf8_lossy(&response);

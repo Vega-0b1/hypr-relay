@@ -36,10 +36,9 @@ pub fn run(args: &[String]) {
         _ => return,
     }
 
-    let out = Command::new("wpctl")
-        .args(["get-volume", sink])
-        .output()
-        .unwrap();
+    let Ok(out) = Command::new("wpctl").args(["get-volume", sink]).output() else {
+        return;
+    };
     let out = String::from_utf8_lossy(&out.stdout);
 
     let muted = out.contains("[MUTED]");
@@ -66,10 +65,9 @@ pub fn mic_toggle() {
         .status()
         .ok();
 
-    let out = Command::new("wpctl")
-        .args(["get-volume", source])
-        .output()
-        .unwrap();
+    let Ok(out) = Command::new("wpctl").args(["get-volume", source]).output() else {
+        return;
+    };
     let out = String::from_utf8_lossy(&out.stdout);
     let muted = out.contains("[MUTED]");
 

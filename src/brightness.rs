@@ -21,21 +21,25 @@ pub fn run(args: &[String]) {
         _ => return,
     }
 
-    let current = Command::new("brightnessctl")
-        .args(["get"])
-        .output()
-        .unwrap();
+    let Ok(current) = Command::new("brightnessctl").args(["get"]).output() else {
+        return;
+    };
     let current = String::from_utf8_lossy(&current.stdout);
 
-    let max = Command::new("brightnessctl")
-        .args(["max"])
-        .output()
-        .unwrap();
+    let Ok(max) = Command::new("brightnessctl").args(["max"]).output() else {
+        return;
+    };
     let max = String::from_utf8_lossy(&max.stdout);
 
     let current: u32 = current.trim().parse().unwrap_or(0);
     let max: u32 = max.trim().parse().unwrap_or(1);
     let percentage = current * 100 / max;
 
-    notification::send("brightness", 9991, 1000, &format!("Brightness {percentage}%"), "");
+    notification::send(
+        "brightness",
+        9991,
+        1000,
+        &format!("Brightness {percentage}%"),
+        "",
+    );
 }

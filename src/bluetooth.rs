@@ -10,7 +10,9 @@ fn strip_ansi(s: &str) -> String {
         if c == '\x1b' && chars.peek() == Some(&'[') {
             chars.next(); // consume '['
             for c2 in chars.by_ref() {
-                if c2.is_ascii_alphabetic() { break; } // end of escape sequence
+                if c2.is_ascii_alphabetic() {
+                    break;
+                } // end of escape sequence
             }
         } else {
             out.push(c);
@@ -58,10 +60,9 @@ pub fn run() {
 }
 
 fn get_device_name(mac: &str) -> String {
-    let out = Command::new("bluetoothctl")
-        .args(["info", mac])
-        .output()
-        .unwrap();
+    let Ok(out) = Command::new("bluetoothctl").args(["info", mac]).output() else {
+        return mac.to_string();
+    };
 
     let out = strip_ansi(&String::from_utf8_lossy(&out.stdout));
 
