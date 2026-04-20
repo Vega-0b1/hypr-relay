@@ -7,23 +7,31 @@ pub fn run(args: &[String]) {
     let sink = "@DEFAULT_AUDIO_SINK@";
 
     match action {
-        "up" => {
+        "up" | "down" => {
+            let step_val: u32 = step.parse().unwrap_or(5);
+            let current = Command::new("wpctl")
+                .args(["get-volume", sink])
+                .output()
+                .ok()
+                .and_then(|o| String::from_utf8(o.stdout).ok())
+                .and_then(|s| {
+                    s.split_whitespace()
+                        .nth(1)
+                        .and_then(|v| v.parse::<f32>().ok())
+                })
+                .map(|v| (v * 100.0) as u32)
+                .unwrap_or(0);
+            let target = if action == "up" {
+                ((current / step_val) + 1) * step_val
+            } else {
+                current.saturating_sub(1) / step_val * step_val
+            };
             Command::new("wpctl")
                 .args(["set-mute", sink, "0"])
                 .status()
                 .ok();
             Command::new("wpctl")
-                .args(["set-volume", sink, &format!("{step}%+"), "--limit", "1.0"])
-                .status()
-                .ok();
-        }
-        "down" => {
-            Command::new("wpctl")
-                .args(["set-mute", sink, "0"])
-                .status()
-                .ok();
-            Command::new("wpctl")
-                .args(["set-volume", sink, &format!("{step}%-")])
+                .args(["set-volume", sink, &format!("{target}%"), "--limit", "1.0"])
                 .status()
                 .ok();
         }
