@@ -8,7 +8,9 @@ use std::env;
 
 fn socket_path(socket: &str) -> String {
     let sig = env::var("HYPRLAND_INSTANCE_SIGNATURE").expect("HYPRLAND_INSTANCE_SIGNATURE not set");
-    let runtime = env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| "/run/user/1000".to_string());
+
+    let uid = unsafe { libc::getuid() };
+    let runtime = env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| format!("/run/user/{uid}"));
 
     let xdg_path = format!("{runtime}/hypr/{sig}/{socket}");
     let tmp_path = format!("/tmp/hypr/{sig}/{socket}");
