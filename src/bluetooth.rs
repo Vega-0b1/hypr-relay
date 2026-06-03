@@ -22,11 +22,13 @@ fn strip_ansi(s: &str) -> String {
 }
 
 pub fn run() {
-    let mut child = Command::new("bluetoothctl")
+    let Ok(mut child) = Command::new("bluetoothctl")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
-        .expect("could not start bluetoothctl");
+    else {
+        return;
+    };
 
     let _stdin = child.stdin.take(); // keep pipe open so bluetoothctl doesn't get EOF and exit
     let stdout = child.stdout.take().unwrap();
