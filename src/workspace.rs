@@ -36,20 +36,11 @@ fn active_workspace(socket_path: &dyn Fn(&str) -> String) -> (i32, String) {
     }
 
     let response = String::from_utf8_lossy(&response);
+    let json: serde_json::Value =
+        serde_json::from_str(&response).unwrap_or(serde_json::Value::Null);
 
-    let id = response
-        .split("\"id\":")
-        .nth(1)
-        .and_then(|s| s.split(',').next())
-        .and_then(|s| s.trim().parse().ok())
-        .unwrap_or(0);
-
-    let name = response
-        .split("\"name\": \"")
-        .nth(1)
-        .and_then(|s| s.split('"').next())
-        .unwrap_or("?")
-        .to_string();
+    let id = json["id"].as_i64().unwrap_or(0) as i32;
+    let name = json["name"].as_str().unwrap_or("?").to_string();
 
     (id, name)
 }
