@@ -30,7 +30,7 @@ fn main() {
         Some("mic") => volume::mic_toggle(),
         Some("brightness") => brightness::run(&args[2..]),
         None => daemon(),
-        _ => eprintln!("usage: hypr-osd [volume|brightness] [args]"),
+        _ => eprintln!("usage: hypr-relay [volume|brightness|mic] [args]"),
     }
 }
 

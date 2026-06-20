@@ -2,6 +2,9 @@
 name = "hypr-relay"
 version = "0.2.1"
 edition = "2024"
+description = "Lightweight daemon for Hyprland that bridges system events to desktop notifications"
+license = "MIT"
+repository = "https://github.com/Vega-0b1/hypr-relay"
 
 [dependencies]
 serde_json = "1"
