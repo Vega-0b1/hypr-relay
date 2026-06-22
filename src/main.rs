@@ -26,8 +26,6 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     match args.get(1).map(|s| s.as_str()) {
-        Some("volume") => volume::run(&args[2..]),
-        Some("mic") => volume::mic_toggle(),
         Some("brightness") => brightness::run(&args[2..]),
         None => daemon(),
         _ => eprintln!("usage: hypr-relay [volume|brightness|mic] [args]"),
@@ -36,8 +34,10 @@ fn main() {
 
 fn daemon() {
     let workspace = std::thread::spawn(|| workspace::run(&socket_path));
-    let bluetooth = std::thread::spawn(|| bluetooth::run());
+    let bluetooth = std::thread::spawn(|| bluetooth::daemon());
+    let volume = std::thread::spawn(|| volume::daemon());
 
     workspace.join().unwrap();
     bluetooth.join().unwrap();
+    volume.join().unwrap();
 }

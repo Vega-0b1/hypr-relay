@@ -21,7 +21,7 @@ fn strip_ansi(s: &str) -> String {
     out
 }
 
-pub fn run() {
+pub fn daemon() {
     let Ok(mut child) = Command::new("bluetoothctl")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
