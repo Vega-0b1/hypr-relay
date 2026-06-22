@@ -1,45 +1,51 @@
 use crate::notification;
-use std::process::Command;
+use std::io::{BufRead, BufReader};
+use std::process::{Command, Stdio};
 
-pub fn run(args: &[String]) {
-    let action = args.get(0).map(|arg| arg.as_str()).unwrap_or("");
-    let step = args.get(1).map(|arg| arg.as_str()).unwrap_or("5");
+pub fn daemon() {
+    let Ok(mut child) = Command::new("udevadm")
+        .args(["monitor", "--kernel", "--subsystem-match=backlight"])
+        .stdout(Stdio::piped())
+        .spawn()
+    else {
+        return;
+    };
 
-    match action {
-        "up" => {
-            Command::new("brightnessctl")
-                .args(["set", &format!("{step}%+")])
-                .status()
-                .ok();
+    let stdout = child.stdout.take().unwrap();
+
+    for line in BufReader::new(stdout).lines() {
+        let line = match line {
+            Ok(l) => l,
+            Err(_) => break,
+        };
+        if !line.contains("change") {
+            continue;
         }
-        "down" => {
-            Command::new("brightnessctl")
-                .args(["set", &format!("{step}%-")])
-                .status()
-                .ok();
-        }
-        _ => return,
+
+        let Ok(current) = Command::new("brightnessctl").args(["get"]).output() else {
+            continue;
+        };
+
+        let Ok(max) = Command::new("brightnessctl").args(["max"]).output() else {
+            continue;
+        };
+
+        let current: u32 = String::from_utf8_lossy(&current.stdout)
+            .trim()
+            .parse()
+            .unwrap_or(0);
+        let max: u32 = String::from_utf8_lossy(&max.stdout)
+            .trim()
+            .parse()
+            .unwrap_or(1);
+        let percentage = current * 100 / max;
+
+        notification::send(
+            "brightness",
+            9991,
+            1000,
+            &format!("Brightness {percentage}%"),
+            "",
+        );
     }
-
-    let Ok(current) = Command::new("brightnessctl").args(["get"]).output() else {
-        return;
-    };
-    let current = String::from_utf8_lossy(&current.stdout);
-
-    let Ok(max) = Command::new("brightnessctl").args(["max"]).output() else {
-        return;
-    };
-    let max = String::from_utf8_lossy(&max.stdout);
-
-    let current: u32 = current.trim().parse().unwrap_or(0);
-    let max: u32 = max.trim().parse().unwrap_or(1);
-    let percentage = current * 100 / max;
-
-    notification::send(
-        "brightness",
-        9991,
-        1000,
-        &format!("Brightness {percentage}%"),
-        "",
-    );
 }
