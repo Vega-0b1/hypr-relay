@@ -12,13 +12,18 @@ pub fn daemon() {
     };
 
     let stdout = child.stdout.take().unwrap();
-    std::thread::sleep(std::time::Duration::from_secs(2));
+    let start = std::time::Instant::now();
 
     for line in BufReader::new(stdout).lines() {
         let line = match line {
             Ok(l) => l,
             Err(_) => break,
         };
+
+        if start.elapsed().as_secs() < 2 {
+            continue;
+        }
+
         if !line.contains(" on sink #") {
             continue;
         }
