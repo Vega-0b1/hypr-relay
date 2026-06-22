@@ -2,21 +2,22 @@
 
 A lightweight daemon for Hyprland that bridges system events to your notification daemon.
 
-Listens for workspace switches and Bluetooth connections via Hyprland IPC, and exposes CLI commands for volume and brightness - all forwarded as standard D-Bus notifications.
+Runs as a single background process and automatically sends D-Bus notifications for workspace switches, Bluetooth connections, volume changes, and brightness changes — no keybind configuration required.
 
 ## Features
 
-- Workspace change notifications (via Hyprland socket)
+- Workspace change notifications (via Hyprland IPC)
 - Bluetooth device connect/disconnect notifications
-- Volume control with mute support
-- Brightness control
+- Volume change notifications (via PipeWire)
+- Brightness change notifications (via udev)
 
 ## Dependencies
 
 - [Hyprland](https://hyprland.org)
 - A Freedesktop-compatible notification daemon (`dunst`, `mako`, `swaync`, etc.)
-- `wpctl` - volume control (PipeWire)
-- `brightnessctl` - brightness control
+- `pactl` - volume event monitoring (PipeWire/PulseAudio)
+- `wpctl` - volume state querying (PipeWire)
+- `brightnessctl` - brightness state querying
 - `bluetoothctl` - Bluetooth events
 
 ## Installation
@@ -30,9 +31,7 @@ cp target/release/hypr-relay ~/.local/bin/
 
 ## Usage
 
-### Daemon
-
-Start the daemon to enable workspace and Bluetooth notifications:
+Start the daemon:
 
 ```
 hypr-relay
@@ -44,35 +43,15 @@ Add to your Hyprland config to start on login:
 exec-once = hypr-relay
 ```
 
-### Volume
+Since hypr-relay listens for system events directly, your keybinds call the underlying tools as normal:
 
 ```
-hypr-relay volume up [step]
-hypr-relay volume down [step]
-hypr-relay volume mute
-hypr-relay mic
-```
-
-Example keybinds in `hyprland.conf`:
-
-```
-bindel = , XF86AudioRaiseVolume, exec, hypr-relay volume up 5
-bindel = , XF86AudioLowerVolume, exec, hypr-relay volume down 5
-bindel = , XF86AudioMute,        exec, hypr-relay volume mute
-```
-
-### Brightness
-
-```
-hypr-relay brightness up [step]
-hypr-relay brightness down [step]
-```
-
-Example keybinds:
-
-```
-bindel = , XF86MonBrightnessUp,   exec, hypr-relay brightness up 5
-bindel = , XF86MonBrightnessDown, exec, hypr-relay brightness down 5
+bindel = , XF86AudioRaiseVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+bindel = , XF86AudioLowerVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+bindel = , XF86AudioMute,         exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+bindel = , XF86AudioMicMute,      exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+bindel = , XF86MonBrightnessUp,   exec, brightnessctl set 5%+
+bindel = , XF86MonBrightnessDown, exec, brightnessctl set 5%-
 ```
 
 ## License
