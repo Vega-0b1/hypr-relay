@@ -12,6 +12,7 @@ pub fn daemon() {
     };
 
     let stdout = child.stdout.take().unwrap();
+    std::thread::sleep(std::time::Duration::from_secs(2));
 
     for line in BufReader::new(stdout).lines() {
         let line = match line {
@@ -38,10 +39,6 @@ pub fn daemon() {
             .unwrap_or(0.0);
 
         let percentage = (vol * 100.0).round() as u32;
-
-        if percentage == 0 {
-            continue;
-        }
 
         if muted {
             notification::send("volume", 9990, 1000, "Volume Muted", "");
