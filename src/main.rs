@@ -32,7 +32,7 @@ fn main() {
 }
 
 fn daemon() {
-    let workspace = std::thread::spawn(|| workspace::run(&socket_path));
+    let workspace = std::thread::spawn(|| workspace::daemon(&socket_path));
     let bluetooth = std::thread::spawn(|| bluetooth::daemon());
     let volume = std::thread::spawn(|| volume::daemon());
     let brightness = std::thread::spawn(|| brightness::daemon());

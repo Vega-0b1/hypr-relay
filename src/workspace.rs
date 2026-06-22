@@ -2,7 +2,7 @@ use crate::notification;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::os::unix::net::UnixStream;
 
-pub fn run(socket_path: &dyn Fn(&str) -> String) {
+pub fn daemon(socket_path: &dyn Fn(&str) -> String) {
     let stream = UnixStream::connect(socket_path(".socket2.sock"))
         .expect("could not connect to Hyprland event socket");
 

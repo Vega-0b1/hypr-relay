@@ -39,6 +39,10 @@ pub fn daemon() {
 
         let percentage = (vol * 100.0).round() as u32;
 
+        if percentage == 0 {
+            continue;
+        }
+
         if muted {
             notification::send("volume", 9990, 1000, "Volume Muted", "");
         } else {
