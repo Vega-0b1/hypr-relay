@@ -1,6 +1,6 @@
 [package]
 name = "hypr-relay"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2024"
 description = "Lightweight daemon for Hyprland that bridges system events to desktop notifications"
 license = "MIT"
