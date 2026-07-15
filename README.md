@@ -2,7 +2,7 @@
 
 A lightweight daemon for Hyprland that bridges system events to your notification daemon.
 
-Runs as a single background process and sends D-Bus notifications for volume, brightness, workspace, and Bluetooth changes — no keybind configuration required.
+Runs as a single background process and sends D-Bus notifications for volume, brightness, workspace, and Bluetooth changes. No keybind configuration required.
 
 |                                |                                  |
 | :----------------------------: | :------------------------------: |
@@ -11,11 +11,10 @@ Runs as a single background process and sends D-Bus notifications for volume, br
 
 ## How it works
 
-hypr-relay doesn't handle keybinds. Instead it listens for the events themselves —
+hypr-relay doesn't handle keybinds. Instead it listens for the events themselves:
 Hyprland's IPC socket, PipeWire sink changes, backlight udev events, and BlueZ device
-events — so your keybinds keep calling `wpctl`/`brightnessctl` as normal and
-notifications appear no matter what triggered the change (keybind, hardware key, GUI,
-another device).
+events. Your keybinds keep calling `wpctl`/`brightnessctl` as normal, and notifications
+appear no matter what triggered the change (keybind, hardware key, GUI, another device).
 
 Each event source runs on its own listener thread inside one process. Notifications use
 fixed IDs and the `x-canonical-private-synchronous` hint, so rapid changes (like holding
@@ -27,10 +26,10 @@ a volume key) update a single notification in place instead of stacking.
 | ---------- | ------------------------------------- | --------------------------- |
 | Volume     | `pactl subscribe`                     | `pactl`, `wpctl` (PipeWire) |
 | Brightness | `udevadm monitor` (backlight)         | `brightnessctl`             |
-| Workspace  | Hyprland IPC                          | —                           |
+| Workspace  | Hyprland IPC                          | nothing                     |
 | Bluetooth  | `bluetoothctl` event stream           | `bluetoothctl` (BlueZ)      |
 
-If a tool is missing, that feature is simply disabled — the rest keep working.
+If a tool is missing, that feature is simply disabled. The rest keep working.
 
 You'll also need a Freedesktop-compatible notification daemon (`mako`, `dunst`,
 `swaync`, etc.).
@@ -88,9 +87,8 @@ Add one line to your Hyprland config:
 exec-once = hypr-relay
 ```
 
-That's the entire setup — with a default Hyprland config everything works out of the
-box. Your keybinds call the underlying tools as normal and hypr-relay picks up the
-resulting events:
+That's the entire setup. With a default Hyprland config everything works out of the
+box, and your existing keybinds keep working as-is:
 
 ```
 bindel = , XF86AudioRaiseVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
@@ -103,17 +101,18 @@ bindel = , XF86MonBrightnessDown, exec, brightnessctl set 5%-
 
 ### Workspace names
 
-Workspace notifications show the workspace's name in the body. Without any
-configuration the name is just the workspace number, but if you name your workspaces
-with [workspace rules](https://wiki.hyprland.org/Configuring/Workspace-Rules/) in
-`hyprland.conf`, the name shows up in the notification automatically:
+The second line of a workspace notification is the workspace's name. By default that
+is just the workspace number. To show something more useful, give your workspaces
+names with [workspace rules](https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/)
+in `hyprland.conf`:
 
 ```
 workspace = 1, defaultName:Main
 workspace = 2, defaultName:Code
 ```
 
-Switching to workspace 2 then notifies "Workspace 2 — Code", as in the screenshot above.
+With these rules, switching to workspace 2 shows "Workspace 2" with "Code" below it,
+as in the screenshot at the top.
 
 ## License
 
