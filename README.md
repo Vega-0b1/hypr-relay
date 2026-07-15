@@ -78,14 +78,15 @@ cp target/release/hypr-relay ~/.local/bin/
 
 ## Usage
 
-Add to your Hyprland config to start on login:
+Add one line to your Hyprland config:
 
 ```
 exec-once = hypr-relay
 ```
 
-That's it. Your keybinds call the underlying tools as normal and hypr-relay picks up
-the resulting events:
+That's the entire setup — with a default Hyprland config everything works out of the
+box. Your keybinds call the underlying tools as normal and hypr-relay picks up the
+resulting events:
 
 ```
 bindel = , XF86AudioRaiseVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
@@ -95,6 +96,20 @@ bindel = , XF86AudioMicMute,      exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ to
 bindel = , XF86MonBrightnessUp,   exec, brightnessctl set 5%+
 bindel = , XF86MonBrightnessDown, exec, brightnessctl set 5%-
 ```
+
+### Workspace names
+
+Workspace notifications show the workspace's name in the body. Without any
+configuration the name is just the workspace number, but if you name your workspaces
+with [workspace rules](https://wiki.hyprland.org/Configuring/Workspace-Rules/) in
+`hyprland.conf`, the name shows up in the notification automatically:
+
+```
+workspace = 1, defaultName:Main
+workspace = 2, defaultName:Code
+```
+
+Switching to workspace 2 then notifies "Workspace 2 — Code", as in the screenshot above.
 
 ## License
 
