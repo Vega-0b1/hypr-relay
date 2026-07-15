@@ -20,6 +20,9 @@ Runs as a single background process and sends desktop notifications for volume, 
 
 If a tool is missing, that feature is simply disabled. The rest keep working.
 
+hypr-relay displays through whatever notification daemon you already run, and works
+with any Freedesktop-compatible one: `mako`, `dunst`, `swaync`, etc.
+
 ## Installation
 
 <details open>
