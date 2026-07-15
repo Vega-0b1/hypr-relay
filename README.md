@@ -20,28 +20,25 @@ Runs as a single background process and sends desktop notifications for volume, 
 
 If a tool is missing, that feature is simply disabled. The rest keep working.
 
-Most of these tools are already on a typical Hyprland setup: `wpctl` ships with
-WirePlumber (PipeWire's session manager), `pactl` comes with PipeWire's PulseAudio
-compat layer, and `bluetoothctl` is part of BlueZ. You'll also need a
-Freedesktop-compatible notification daemon such as `mako`, `dunst`, or `swaync`.
-
 ## Installation
 
-### Arch Linux ([AUR](https://aur.archlinux.org/packages/hypr-relay))
+<details open>
+<summary><strong>Arch Linux (AUR)</strong></summary>
+
+Nice and easy, dependencies install automatically:
 
 ```bash
 yay -S hypr-relay
 ```
 
-The package pulls in `wireplumber`, `brightnessctl`, and `bluez-utils` automatically.
-If notifications for some feature don't show up, this one-liner covers every tool
-hypr-relay uses (`--needed` skips anything already installed):
+[AUR package page](https://aur.archlinux.org/packages/hypr-relay)
 
-```bash
-sudo pacman -S --needed libpulse wireplumber brightnessctl bluez-utils
-```
+</details>
 
-You can also build the pacman package yourself from the included PKGBUILD:
+<details>
+<summary><strong>PKGBUILD (build it yourself)</strong></summary>
+
+Builds the same pacman package straight from the repo, dependencies included:
 
 ```bash
 git clone https://github.com/Vega-0b1/hypr-relay
@@ -49,7 +46,27 @@ cd hypr-relay
 makepkg -si
 ```
 
-### NixOS (flake input)
+</details>
+
+<details>
+<summary><strong>Dependencies</strong></summary>
+
+Most of the tools hypr-relay uses are already on a typical Hyprland setup: `wpctl`
+ships with WirePlumber (PipeWire's session manager), `pactl` comes with PipeWire's
+PulseAudio compat layer, and `bluetoothctl` is part of BlueZ. You'll also need a
+notification daemon such as `mako`, `dunst`, or `swaync`.
+
+If notifications for some feature don't show up, this covers every tool hypr-relay
+uses (`--needed` skips anything already installed):
+
+```bash
+sudo pacman -S --needed libpulse wireplumber brightnessctl bluez-utils
+```
+
+</details>
+
+<details>
+<summary><strong>NixOS (flake input)</strong></summary>
 
 Add the repo as a (non-flake) input and expose it through an overlay:
 
@@ -76,14 +93,7 @@ environment.systemPackages = with pkgs; [
 `wpctl` comes from `services.pipewire` and `bluetoothctl` from
 `hardware.bluetooth.enable = true`.
 
-### From source
-
-```bash
-git clone https://github.com/Vega-0b1/hypr-relay
-cd hypr-relay
-cargo build --release
-cp target/release/hypr-relay ~/.local/bin/
-```
+</details>
 
 ## Usage
 
