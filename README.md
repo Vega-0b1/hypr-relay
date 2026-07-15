@@ -34,6 +34,26 @@ If a tool is missing, that feature is simply disabled. The rest keep working.
 You'll also need a Freedesktop-compatible notification daemon (`mako`, `dunst`,
 `swaync`, etc.).
 
+Most of these tools are already on a typical Hyprland setup: `wpctl` ships with
+WirePlumber (PipeWire's session manager), `pactl` comes with PipeWire's PulseAudio
+compat layer, and `bluetoothctl` is part of BlueZ. Installing through the AUR package
+pulls in everything automatically. To check on Arch (`--needed` skips anything already
+installed):
+
+```bash
+sudo pacman -S --needed libpulse wireplumber brightnessctl bluez-utils
+```
+
+On NixOS, `wpctl` comes from `services.pipewire` and `bluetoothctl` from
+`hardware.bluetooth.enable = true`. Add the remaining two to your packages:
+
+```nix
+environment.systemPackages = with pkgs; [
+  pulseaudio    # for pactl only, PipeWire stays your sound server
+  brightnessctl
+];
+```
+
 ## Installation
 
 ### Arch Linux ([AUR](https://aur.archlinux.org/packages/hypr-relay))
