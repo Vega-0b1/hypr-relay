@@ -3,12 +3,23 @@ use std::io::{BufRead, BufReader};
 use std::process::{Command, Stdio};
 
 pub fn daemon() {
+    // respawn the listener if udevadm dies
+    loop {
+        if !run() {
+            return;
+        }
+        std::thread::sleep(std::time::Duration::from_secs(2));
+    }
+}
+
+// returns false if udevadm couldn't be spawned at all (feature disabled)
+fn run() -> bool {
     let Ok(mut child) = Command::new("udevadm")
         .args(["monitor", "--kernel", "--subsystem-match=backlight"])
         .stdout(Stdio::piped())
         .spawn()
     else {
-        return;
+        return false;
     };
 
     let stdout = child.stdout.take().unwrap();
@@ -48,4 +59,8 @@ pub fn daemon() {
             "",
         );
     }
+
+    let _ = child.kill();
+    let _ = child.wait();
+    true
 }

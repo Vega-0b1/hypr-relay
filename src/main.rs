@@ -27,7 +27,12 @@ fn main() {
 
     match args.get(1).map(|s| s.as_str()) {
         None => daemon(),
-        _ => eprintln!("usage: hypr-relay"),
+        Some("--version" | "-V") => println!("hypr-relay {}", env!("CARGO_PKG_VERSION")),
+        Some("--help" | "-h") => println!("usage: hypr-relay"),
+        _ => {
+            eprintln!("usage: hypr-relay");
+            std::process::exit(1);
+        }
     }
 }
 

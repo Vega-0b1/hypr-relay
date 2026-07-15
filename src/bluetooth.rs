@@ -22,12 +22,23 @@ fn strip_ansi(s: &str) -> String {
 }
 
 pub fn daemon() {
+    // respawn the listener if bluetoothctl dies (e.g. bluetoothd restart)
+    loop {
+        if !run() {
+            return;
+        }
+        std::thread::sleep(std::time::Duration::from_secs(2));
+    }
+}
+
+// returns false if bluetoothctl couldn't be spawned at all (feature disabled)
+fn run() -> bool {
     let Ok(mut child) = Command::new("bluetoothctl")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
     else {
-        return;
+        return false;
     };
 
     let _stdin = child.stdin.take(); // keep pipe open so bluetoothctl doesn't get EOF and exit
@@ -59,6 +70,10 @@ pub fn daemon() {
             }
         }
     }
+
+    let _ = child.kill();
+    let _ = child.wait();
+    true
 }
 
 fn get_device_name(mac: &str) -> String {
