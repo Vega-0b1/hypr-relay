@@ -37,6 +37,20 @@ You'll also need a Freedesktop-compatible notification daemon (`mako`, `dunst`,
 
 ## Installation
 
+### Arch Linux ([AUR](https://aur.archlinux.org/packages/hypr-relay))
+
+```bash
+yay -S hypr-relay
+```
+
+Or build the pacman package manually from the included PKGBUILD:
+
+```bash
+git clone https://github.com/Vega-0b1/hypr-relay
+cd hypr-relay
+makepkg -si
+```
+
 ### NixOS (flake input)
 
 Add the repo as a (non-flake) input and expose it through an overlay:
@@ -55,16 +69,6 @@ nixpkgs.overlays = [
   (final: prev: { hypr-relay = prev.callPackage hypr-relay {}; })
 ];
 environment.systemPackages = [ pkgs.hypr-relay ];
-```
-
-### Arch Linux
-
-Build a pacman package from the included PKGBUILD:
-
-```bash
-git clone https://github.com/Vega-0b1/hypr-relay
-cd hypr-relay
-makepkg -si
 ```
 
 ### From source
