@@ -2,23 +2,12 @@
 
 A lightweight daemon for Hyprland that bridges system events to your notification daemon.
 
-Runs as a single background process and sends D-Bus notifications for volume, brightness, workspace, and Bluetooth changes. No keybind configuration required.
+Runs as a single background process and sends desktop notifications for volume, brightness, workspace, and Bluetooth changes. No keybind configuration required.
 
 |                                |                                  |
 | :----------------------------: | :------------------------------: |
 |  ![Volume](assets/volume.png)  |      ![Muted](assets/mute.png)   |
 | ![Workspace](assets/workspace.png) | ![Bluetooth](assets/bluetooth.png) |
-
-## How it works
-
-hypr-relay doesn't handle keybinds. Instead it listens for the events themselves:
-Hyprland's IPC socket, PipeWire sink changes, backlight udev events, and BlueZ device
-events. Your keybinds keep calling `wpctl`/`brightnessctl` as normal, and notifications
-appear no matter what triggered the change (keybind, hardware key, GUI, another device).
-
-Each event source runs on its own listener thread inside one process. Notifications use
-fixed IDs and the `x-canonical-private-synchronous` hint, so rapid changes (like holding
-a volume key) update a single notification in place instead of stacking.
 
 ## Features
 
@@ -31,28 +20,10 @@ a volume key) update a single notification in place instead of stacking.
 
 If a tool is missing, that feature is simply disabled. The rest keep working.
 
-You'll also need a Freedesktop-compatible notification daemon (`mako`, `dunst`,
-`swaync`, etc.).
-
 Most of these tools are already on a typical Hyprland setup: `wpctl` ships with
 WirePlumber (PipeWire's session manager), `pactl` comes with PipeWire's PulseAudio
-compat layer, and `bluetoothctl` is part of BlueZ. Installing through the AUR package
-pulls in everything automatically. To check on Arch (`--needed` skips anything already
-installed):
-
-```bash
-sudo pacman -S --needed libpulse wireplumber brightnessctl bluez-utils
-```
-
-On NixOS, `wpctl` comes from `services.pipewire` and `bluetoothctl` from
-`hardware.bluetooth.enable = true`. Add the remaining two to your packages:
-
-```nix
-environment.systemPackages = with pkgs; [
-  pulseaudio    # for pactl only, PipeWire stays your sound server
-  brightnessctl
-];
-```
+compat layer, and `bluetoothctl` is part of BlueZ. You'll also need a
+Freedesktop-compatible notification daemon such as `mako`, `dunst`, or `swaync`.
 
 ## Installation
 
@@ -62,7 +33,15 @@ environment.systemPackages = with pkgs; [
 yay -S hypr-relay
 ```
 
-Or build the pacman package manually from the included PKGBUILD:
+The package pulls in `wireplumber`, `brightnessctl`, and `bluez-utils` automatically.
+If notifications for some feature don't show up, this one-liner covers every tool
+hypr-relay uses (`--needed` skips anything already installed):
+
+```bash
+sudo pacman -S --needed libpulse wireplumber brightnessctl bluez-utils
+```
+
+You can also build the pacman package yourself from the included PKGBUILD:
 
 ```bash
 git clone https://github.com/Vega-0b1/hypr-relay
@@ -87,8 +66,15 @@ inputs.hypr-relay = {
 nixpkgs.overlays = [
   (final: prev: { hypr-relay = prev.callPackage hypr-relay {}; })
 ];
-environment.systemPackages = [ pkgs.hypr-relay ];
+environment.systemPackages = with pkgs; [
+  hypr-relay
+  pulseaudio    # for pactl only, PipeWire stays your sound server
+  brightnessctl
+];
 ```
+
+`wpctl` comes from `services.pipewire` and `bluetoothctl` from
+`hardware.bluetooth.enable = true`.
 
 ### From source
 
@@ -133,6 +119,17 @@ workspace = 2, defaultName:Code
 
 With these rules, switching to workspace 2 shows "Workspace 2" with "Code" below it,
 as in the screenshot at the top.
+
+## How it works
+
+hypr-relay doesn't handle keybinds. Instead it listens for the events themselves:
+Hyprland's IPC socket, PipeWire sink changes, backlight udev events, and BlueZ device
+events. Your keybinds keep calling `wpctl`/`brightnessctl` as normal, and notifications
+appear no matter what triggered the change (keybind, hardware key, GUI, another device).
+
+Each event source runs on its own listener thread inside one process. Notifications use
+fixed IDs and the `x-canonical-private-synchronous` hint, so rapid changes (like holding
+a volume key) update a single notification in place instead of stacking.
 
 ## License
 
