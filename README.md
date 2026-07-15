@@ -2,25 +2,72 @@
 
 A lightweight daemon for Hyprland that bridges system events to your notification daemon.
 
-Runs as a single background process and automatically sends D-Bus notifications for workspace switches, Bluetooth connections, volume changes, and brightness changes — no keybind configuration required.
+Runs as a single background process and sends D-Bus notifications for volume, brightness, workspace, and Bluetooth changes — no keybind configuration required.
+
+|                                |                                  |
+| :----------------------------: | :------------------------------: |
+|  ![Volume](assets/volume.png)  |      ![Muted](assets/mute.png)   |
+| ![Workspace](assets/workspace.png) | ![Bluetooth](assets/bluetooth.png) |
+
+## How it works
+
+hypr-relay doesn't handle keybinds. Instead it listens for the events themselves —
+Hyprland's IPC socket, PipeWire sink changes, backlight udev events, and BlueZ device
+events — so your keybinds keep calling `wpctl`/`brightnessctl` as normal and
+notifications appear no matter what triggered the change (keybind, hardware key, GUI,
+another device).
+
+Each event source runs on its own listener thread inside one process. Notifications use
+fixed IDs and the `x-canonical-private-synchronous` hint, so rapid changes (like holding
+a volume key) update a single notification in place instead of stacking.
 
 ## Features
 
-- Workspace change notifications (via Hyprland IPC)
-- Bluetooth device connect/disconnect notifications
-- Volume change notifications (via PipeWire)
-- Brightness change notifications (via udev)
+| Feature    | Event source                          | Requires                    |
+| ---------- | ------------------------------------- | --------------------------- |
+| Volume     | `pactl subscribe`                     | `pactl`, `wpctl` (PipeWire) |
+| Brightness | `udevadm monitor` (backlight)         | `brightnessctl`             |
+| Workspace  | Hyprland IPC                          | —                           |
+| Bluetooth  | `bluetoothctl` event stream           | `bluetoothctl` (BlueZ)      |
 
-## Dependencies
+If a tool is missing, that feature is simply disabled — the rest keep working.
 
-- [Hyprland](https://hyprland.org)
-- A Freedesktop-compatible notification daemon (`dunst`, `mako`, `swaync`, etc.)
-- `pactl` - volume event monitoring (PipeWire/PulseAudio)
-- `wpctl` - volume state querying (PipeWire)
-- `brightnessctl` - brightness state querying
-- `bluetoothctl` - Bluetooth events
+You'll also need a Freedesktop-compatible notification daemon (`mako`, `dunst`,
+`swaync`, etc.).
 
 ## Installation
+
+### NixOS (flake input)
+
+Add the repo as a (non-flake) input and expose it through an overlay:
+
+```nix
+# flake.nix
+inputs.hypr-relay = {
+  url = "github:Vega-0b1/hypr-relay";
+  flake = false;
+};
+```
+
+```nix
+# in your NixOS configuration
+nixpkgs.overlays = [
+  (final: prev: { hypr-relay = prev.callPackage hypr-relay {}; })
+];
+environment.systemPackages = [ pkgs.hypr-relay ];
+```
+
+### Arch Linux
+
+Build a pacman package from the included PKGBUILD:
+
+```bash
+git clone https://github.com/Vega-0b1/hypr-relay
+cd hypr-relay
+makepkg -si
+```
+
+### From source
 
 ```bash
 git clone https://github.com/Vega-0b1/hypr-relay
@@ -31,19 +78,14 @@ cp target/release/hypr-relay ~/.local/bin/
 
 ## Usage
 
-Start the daemon:
-
-```
-hypr-relay
-```
-
 Add to your Hyprland config to start on login:
 
 ```
 exec-once = hypr-relay
 ```
 
-Since hypr-relay listens for system events directly, your keybinds call the underlying tools as normal:
+That's it. Your keybinds call the underlying tools as normal and hypr-relay picks up
+the resulting events:
 
 ```
 bindel = , XF86AudioRaiseVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
