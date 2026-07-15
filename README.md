@@ -1,8 +1,13 @@
 # hypr-relay
 
+[![AUR version](https://img.shields.io/aur/version/hypr-relay)](https://aur.archlinux.org/packages/hypr-relay)
+[![License: MIT](https://img.shields.io/github/license/Vega-0b1/hypr-relay)](LICENSE)
+
 A lightweight daemon for Hyprland that bridges system events to your notification daemon.
 
 Runs as a single background process and sends desktop notifications for volume, brightness, workspace, and Bluetooth changes. No keybind configuration required.
+
+![demo](assets/demo.gif)
 
 |                                |                                  |
 | :----------------------------: | :------------------------------: |
