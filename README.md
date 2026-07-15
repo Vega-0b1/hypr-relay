@@ -104,23 +104,22 @@ exec-once = hypr-relay
 ```
 
 That's the entire setup. With a default Hyprland config everything works out of the
-box, and your existing keybinds keep working as-is:
-
-```
-bindel = , XF86AudioRaiseVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
-bindel = , XF86AudioLowerVolume,  exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
-bindel = , XF86AudioMute,         exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-bindel = , XF86AudioMicMute,      exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
-bindel = , XF86MonBrightnessUp,   exec, brightnessctl set 5%+
-bindel = , XF86MonBrightnessDown, exec, brightnessctl set 5%-
-```
+box, and your existing keybinds keep working as-is.
 
 ### Workspace names
 
 The second line of a workspace notification is the workspace's name. By default that
 is just the workspace number. To show something more useful, give your workspaces
-names with [workspace rules](https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/)
-in `hyprland.conf`:
+names with workspace rules.
+
+Lua config (Hyprland 0.55 and newer):
+
+```lua
+hl.workspace_rule({ workspace = "1", default_name = "Main" })
+hl.workspace_rule({ workspace = "2", default_name = "Code" })
+```
+
+hyprlang config (`hyprland.conf`):
 
 ```
 workspace = 1, defaultName:Main
