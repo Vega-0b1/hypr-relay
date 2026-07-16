@@ -37,13 +37,19 @@ fn main() {
 }
 
 fn daemon() {
-    let workspace = std::thread::spawn(|| workspace::daemon(&socket_path));
-    let bluetooth = std::thread::spawn(|| bluetooth::daemon());
-    let volume = std::thread::spawn(|| volume::daemon());
-    let brightness = std::thread::spawn(|| brightness::daemon());
+    let mut handles = Vec::new();
 
-    workspace.join().unwrap();
-    bluetooth.join().unwrap();
-    volume.join().unwrap();
-    brightness.join().unwrap();
+    if env::var("HYPRLAND_INSTANCE_SIGNATURE").is_ok() {
+        handles.push(std::thread::spawn(|| workspace::daemon(&socket_path)));
+    } else {
+        eprintln!("hypr-relay: HYPRLAND_INSTANCE_SIGNATURE not set - workspace module disabled");
+    }
+
+    handles.push(std::thread::spawn(bluetooth::daemon));
+    handles.push(std::thread::spawn(volume::daemon));
+    handles.push(std::thread::spawn(brightness::daemon));
+
+    for h in handles {
+        let _ = h.join();
+    }
 }
