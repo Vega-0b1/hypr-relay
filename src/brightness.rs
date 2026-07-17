@@ -48,7 +48,9 @@ fn run() -> bool {
         let max: u32 = String::from_utf8_lossy(&max.stdout)
             .trim()
             .parse()
-            .unwrap_or(1);
+            .unwrap_or(1)
+            .max(1);
+
         let percentage = current * 100 / max;
 
         notification::send(
